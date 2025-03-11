@@ -1,0 +1,50 @@
+
+###
+GET http://127.0.0.1:8000/api/category/
+
+
+
+###
+POST http://127.0.0.1:8000/api/category/
+Content-Type: application/json
+
+{
+    "name":"salads"
+}
+
+
+
+###
+POST http://127.0.0.1:8000/api/category/3/product/
+Content-Type: application/json
+
+{
+    "title":"snacks",
+    "description":"bsamosa",
+    "price":20
+}
+
+
+###
+GET http://127.0.0.1:8000/api/products/
+
+
+###
+PUT http://127.0.0.1:8000/api/products/3/
+Content-Type: application/json
+
+{
+     "id": 3,
+    "title": "snacks",
+    "description": "samosa",
+    "price": "20.00",
+    "category_object": 3
+}
+
+
+
+###
+GET http://127.0.0.1:8000/api/products?Meals
+
+
+

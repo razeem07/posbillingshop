@@ -2,13 +2,15 @@ from django.shortcuts import render,get_object_or_404
 
 from rest_framework.viewsets import ViewSet,ModelViewSet
 
-from pos.models import Category,Product
+from pos.models import Category,Product,Order,OrderItems
 
-from pos.serializers import CategorySerializer,ProductSerializer
+from pos.serializers import CategorySerializer,ProductSerializer,OrderSerializer,OrderItemSerializer
 
 from rest_framework.response import Response
 
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,RetrieveAPIView,UpdateAPIView
+
+from rest_framework.views import APIView
 
 
 # Create your views here.
@@ -111,6 +113,69 @@ class ProductViewSetView(ModelViewSet):
 
 
          return qs
+
+
+class OrderCreateView(CreateAPIView):
+
+    serializer_class=OrderSerializer
+
+ 
+
+ 
+class OrderItemCreateView(CreateAPIView):
+        
+       serializer_class=OrderItemSerializer
+
+       def perform_create(self,serializer):
+           
+           id=self.kwargs.get("pk")
+
+           order_instance=get_object_or_404(Order,id=id)
+
+           product_id=self.request.data.get('product_object')
+
+           product_instance=get_object_or_404(Product,id=product_id)
+   
+           serializer.save(order_object=order_instance,product_object=product_instance)
+
+
+           
+
+class OrderRetrieveView(RetrieveAPIView):
+
+    queryset=Order.objects.all()
+
+    serializer_class=OrderSerializer
+
+
+
+
+class GenerateBillView(UpdateAPIView):
+
+    serializer_class=OrderSerializer
+
+    queryset = Order.objects.all()
+
+    def perform_update(self,serializer):
+
+        id=self.kwargs.get("pk")
+
+        order_instance=get_object_or_404(Order,id=id)
+
+        order_items=OrderItems.objects.filter(order_object=order_instance)
+
+        total=sum([oi.product_object.price * oi.qty for  oi in order_items])
+
+        return serializer.save(status=True,total=total)
+    
+
+
+        
+
+        
+
+
+
 
 
 

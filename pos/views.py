@@ -12,6 +12,10 @@ from rest_framework.generics import CreateAPIView,RetrieveAPIView,UpdateAPIView
 
 from rest_framework.views import APIView
 
+from rest_framework import serializers
+
+from twilio.rest import Client
+
 
 # Create your views here.
 
@@ -126,17 +130,59 @@ class OrderItemCreateView(CreateAPIView):
         
        serializer_class=OrderItemSerializer
 
-       def perform_create(self,serializer):
+       def create(self,request,*args,**kwargs):
            
-           id=self.kwargs.get("pk")
+           order_id = kwargs.get("pk")
 
-           order_instance=get_object_or_404(Order,id=id)
+           order_instance = get_object_or_404(Order,id=order_id)
 
-           product_id=self.request.data.get('product_object')
+           product_id = request.data.get("product_object")
 
-           product_instance=get_object_or_404(Product,id=product_id)
+           product_instance = get_object_or_404(Product,id=product_id)
+
+           qty = request.data.get("qty")
+
+           order_item_instance,created = OrderItems.objects.get_or_create(
+          order_object=order_instance,product_object=product_instance)
+
+
+           if created:
+               
+               order_item_instance.qty=qty
+               order_item_instance.save()
+
+           else:
+               
+               order_item_instance.qty+=qty
+
+               order_item_instance.save()
+
+               
+           serializer_instance=OrderItemSerializer(order_item_instance)
+           
+           return Response(serializer_instance.data)
+
+
+
+
+         
+
+
+
+
+    #    def perform_create(self,serializer):
+           
+    #        id=self.kwargs.get("pk")
+
+    #        order_instance=get_object_or_404(Order,id=id)
+
+    #        product_id=self.request.data.get('product_object')
+
+    #        product_instance=get_object_or_404(Product,id=product_id)
+
+
    
-           serializer.save(order_object=order_instance,product_object=product_instance)
+    #        serializer.save(order_object=order_instance,product_object=product_instance)
 
 
            
@@ -162,14 +208,33 @@ class GenerateBillView(UpdateAPIView):
 
         order_instance=get_object_or_404(Order,id=id)
 
+        if order_instance.status:
+
+            raise serializers.ValidationError("bill has been already generated")
+
         order_items=OrderItems.objects.filter(order_object=order_instance)
 
         total=sum([oi.product_object.price * oi.qty for  oi in order_items])
+
+        Send_invoice_to_whatsapp(order_instance,total)
 
         return serializer.save(status=True,total=total)
     
 
 
+def Send_invoice_to_whatsapp(order_instance,total):
+
+    account_sid = 'AC5c5608b9eda1791cabb0f448d7830d85'
+    auth_token = 'ccbf90984f49e39252965625a5c11355'
+    client = Client(account_sid, auth_token)
+
+    message = client.messages.create(
+    from_='whatsapp:+14155238886',
+    body= f"Order Completed - ordr_id= {order_instance.id} \n  total={total}",
+    to='whatsapp:+919037405251'
+    )
+
+    print(message.sid)
         
 
         

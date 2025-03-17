@@ -40,7 +40,7 @@ class OrderItems(models.Model):
 
     product_object=models.ForeignKey(Product,on_delete=models.CASCADE)
 
-    qty=models.DecimalField(max_digits=6,decimal_places=3)
+    qty=models.DecimalField(max_digits=6,decimal_places=3,default=0.0)
 
 
 

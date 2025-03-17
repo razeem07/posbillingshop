@@ -54,28 +54,28 @@ POST http://127.0.0.1:8000/api/orders/
 Content-Type: application/json
 
 {
-    "phone":"9037498989"
+    "phone":"8281750374"
 }
 
 
 #api call for order item
 ###
-POST http://127.0.0.1:8000/api/orders/1/items
+POST http://127.0.0.1:8000/api/orders/3/items
 Content-Type: application/json
 
 {
     "product_object":2,
-    "qty" : 3
+    "qty" : 2
 }
 
 
 #api for order detail view
 
 ###
-GET http://127.0.0.1:8000/api/orders/1
+GET http://127.0.0.1:8000/api/orders/3
 
 ###
-PATCH  http://127.0.0.1:8000/api/orders/1/generate-bill/
+PATCH  http://127.0.0.1:8000/api/orders/3/generate-bill/
 
 
 
